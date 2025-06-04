@@ -1,0 +1,42 @@
+library(tidyverse)
+
+# === Step 1: Load HRD scores ===
+hrd_df <- read_csv("/Users/ashinimodi/Documents/icgc_scarHRD_results.csv", show_col_types = FALSE)
+
+# === Step 2: Load ID exposures (samples are rows) ===
+id_df <- read_csv("/Users/ashinimodi/Documents/ID_exposures.csv", show_col_types = FALSE)
+colnames(id_df)[1] <- "Sample"  # Ensure first column is named Sample
+
+# === Step 3: Extract ID8 ===
+id8_long <- id_df %>%
+  select(Sample, ID8_Exposure = ID8)
+
+# === Step 4: Load BRCA status table ===
+brca_status <- read_csv("/Users/ashinimodi/Documents/BRCA_Status_Table.csv", show_col_types = FALSE)
+
+# === Step 5: Merge all data ===
+plot_df <- hrd_df %>%
+  inner_join(id8_long, by = c("SampleID" = "Sample")) %>%
+  left_join(brca_status, by = c("SampleID" = "Sample")) %>%
+  mutate(
+    BRCA_Status = ifelse(is.na(BRCA_Status), "WT", BRCA_Status),
+    BRCA_Status = factor(BRCA_Status, levels = c("BRCA1", "BRCA2", "BRCA1+BRCA2", "WT"))
+  )
+
+# === Step 6: Plot ===
+ggplot(plot_df, aes(x = `HRD-sum`, y = ID8_Exposure, color = BRCA_Status)) +
+  geom_point(size = 3, alpha = 0.9) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linetype = "dashed") +
+  scale_color_manual(values = c(
+    "BRCA1" = "red",
+    "BRCA2" = "blue",
+    "BRCA1+BRCA2" = "purple",
+    "WT" = "gray50"
+  )) +
+  labs(
+    title = "ID8 Exposure vs HRD Sum by BRCA Status",
+    x = "HRD-sum",
+    y = "ID8 Exposure",
+    color = "BRCA Status"
+  ) +
+  theme_minimal()
