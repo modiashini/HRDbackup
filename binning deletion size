@@ -1,0 +1,30 @@
+####TO CALCULATE DELETION BIN PROPORTIONS#######
+# Load libraries
+library(dplyr)
+library(tidyr)
+library(readr)
+# Step 1: Load MAF file (as tibble)
+maf <- readRDS("/Users/ashinimodi/Documents/Breast_AdenoCa_ICGC_maf.rds.gzip")
+# Step 2: Filter for deletions where alt allele is "-"
+del_maf <- maf[maf$Variant_Type == "DEL" & maf$Tumor_Seq_Allele2 == "-", ]
+# Step 3: Compute deletion length = length of reference allele
+del_maf$Del_Length <- nchar(del_maf$Reference_Allele)
+# Step 4: Define deletion size bins
+bin_breaks <- c(0, 1, 5, 10, 20, 40, 60, Inf)
+bin_labels <- c("1 bp", "2–5 bp", "6–10 bp", "11–20 bp", "21–40 bp", "41–60 bp", "60+ bp")
+del_maf$Del_Bin <- cut(del_maf$Del_Length, breaks = bin_breaks, labels = bin_labels,
+                       right = TRUE, include.lowest = TRUE)
+# Step 5: Count deletions per bin per sample, and get proportions
+bin_counts <- del_maf %>%
+  count(Tumor_Sample_Barcode, Del_Bin, name = "Count") %>%
+  group_by(Tumor_Sample_Barcode) %>%
+  mutate(Proportion = Count / sum(Count)) %>%
+  rename(Sample = Tumor_Sample_Barcode) %>%
+  ungroup()
+# Step 6: Compute average deletion size per sample
+avg_del_size <- del_maf %>%
+  group_by(Sample = Tumor_Sample_Barcode) %>%
+  summarize(Avg_Deletion_Size = mean(Del_Length, na.rm = TRUE))
+# Final Outputs:
+# bin_counts — long-format df with Sample, Del_Bin, Count, Proportion
+# avg_del_size — df with Sample and average deletion size
