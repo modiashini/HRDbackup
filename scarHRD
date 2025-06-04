@@ -1,0 +1,36 @@
+######TO FIND HRD SUM#####
+library("scarHRD")
+library(dplyr)
+# Load full dataset
+df_all <- read.table("/Users/ashinimodi/Documents/icgc_segments_chr_cleaned_no0.txt", header = TRUE, sep = "\t", stringsAsFactors = FALSE)
+# Add "chr" prefix
+df_all$Chromosome <- paste0("chr", df_all$Chromosome)
+# Drop rows with missing values
+df_all <- df_all[complete.cases(df_all), ]
+# Get unique samples
+sample_ids <- unique(df_all$SampleID)
+# Store results
+results_list <- list()
+for (sample_id in sample_ids) {
+  sample_df <- df_all %>% filter(SampleID == sample_id)
+  
+  # Write to temp file
+  temp_file <- tempfile(fileext = ".txt")
+  write.table(sample_df, temp_file, sep = "\t", quote = FALSE, row.names = FALSE)
+  
+  # Try scar_score
+  result <- tryCatch({
+    score <- scar_score(temp_file, reference = "grch37", seqz = FALSE)
+    cbind(data.frame(SampleID = sample_id), score)
+  }, error = function(e) {
+    message(paste("❌", sample_id, "failed:", conditionMessage(e)))
+    NULL
+  })
+  
+  if (!is.null(result)) {
+    results_list[[sample_id]] <- result
+  }
+}
+# Combine all results
+final_results <- do.call(rbind, results_list)
+print(final_results)
