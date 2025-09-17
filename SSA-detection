@@ -1,0 +1,121 @@
+
+# EXTRACTING SSA-LIKE DELETIONS FROM PCAWG SV DATA (no extra gap penalties; first 10 samples)
+
+library(data.table)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(Biostrings)
+library(ggplot2)
+
+sv_file   <- "/Users/ashinimodi/Documents/ICGC_data/pcawg_consensus_1.6.161116.somatic_svs.xena.donor"
+min_del   <- 30    # Minimum deletion size (bp)
+min_repeat <- 30   # Minimum repeat size  (bp)
+flank_size <- 400  # Flanking sequence window (bp)
+n_samples  <- 50   # <-- limit to first 50 samples
+
+# Load and fix structural variant file
+sv_dt <- fread(sv_file)
+setnames(sv_dt, c("chr", "start", "end", "sample"), c("Chromosome", "Start", "End", "Sample"))
+stopifnot(all(c("Chromosome", "Start", "End", "Sample", "effect") %in% colnames(sv_dt)))
+sv_dt <- sv_dt[effect == "DEL" & !is.na(Start) & !is.na(End)]
+sv_dt[, del_len := abs(End - Start) + 1]
+sv_dt <- sv_dt[del_len >= min_del]
+
+#Limit to first N samples
+samples_to_run <- unique(sv_dt$Sample)
+if (length(samples_to_run) == 0) stop("No samples found after filtering.")
+samples_to_run <- samples_to_run[seq_len(min(n_samples, length(samples_to_run)))]
+sv_sub <- sv_dt[Sample %in% samples_to_run]
+
+# Extract flanking sequence
+get_flanking_seqs <- function(chr, start, end, ref_genome, N = flank_size) {
+  upstream <- as.character(getSeq(ref_genome, chr, max(1, start - N), start - 1))
+  downstream <- as.character(getSeq(ref_genome, chr, end + 1, end + N))
+  list(upstream = upstream, downstream = downstream)
+}
+
+# Align and find repeats (NO explicit gapOpening/gapExtension)
+find_homeologous_repeat <- function(upstream, downstream, minlen = 20, pid_cutoff = 80) {
+  aln <- pairwiseAlignment(
+    pattern = DNAString(upstream),
+    subject = DNAString(downstream),
+    type = "local",                # local alignment
+    substitutionMatrix = NULL      # default nucleotide scoring
+    # NOTE: no gapOpening / gapExtension specified
+  )
+  aln_len <- width(alignedPattern(aln))
+  pid_val <- pid(aln, type = "PID1")
+
+  if (aln_len >= minlen && pid_val >= pid_cutoff) {
+    list(length = aln_len,
+         seq = as.character(alignedPattern(aln)),
+         percent_identity = pid_val)
+  } else {
+    list(length = 0, seq = "", percent_identity = 0)
+  }
+}
+
+extract_repeat_info <- function(i) {
+  row <- sv_sub[i]
+  chr <- as.character(row$Chromosome)
+  start <- as.integer(row$Start)
+  end <- as.integer(row$End)
+  if (is.na(chr) || is.na(start) || is.na(end)) return(NULL)
+
+  seqs <- get_flanking_seqs(chr, start, end, BSgenome.Hsapiens.UCSC.hg19)
+  rep_info <- find_homeologous_repeat(seqs$upstream, seqs$downstream,
+                                      minlen = min_repeat, pid_cutoff = 80)
+
+  data.table(
+    Sample = row$Sample,
+    Chromosome = chr,
+    Start = start,
+    End = end,
+    Deletion_Size = row$del_len,
+    Repeat_Length = rep_info$length,
+    Repeat_Seq = rep_info$seq,
+    Repeat_PID = rep_info$percent_identity
+  )
+}
+
+# Run across limited deletions with progress bar
+cat("Running SSA extraction on", nrow(sv_sub), "large deletions from",
+    length(samples_to_run), "samples...\n")
+ssa_results <- vector("list", nrow(sv_sub))
+pb <- txtProgressBar(min = 0, max = nrow(sv_sub), style = 3)
+
+for (i in seq_len(nrow(sv_sub))) {
+  res <- extract_repeat_info(i)
+  ssa_results[[i]] <- res
+
+  # live updates of SSA candidates
+  if (!is.null(res) && res$Repeat_Length >= min_repeat && res$Repeat_PID >= 80) {
+    cat(sprintf("→ SSA match at %s:%d-%d | Repeat %dbp | PID: %.1f%%\n",
+                res$Chromosome, res$Start, res$End, res$Repeat_Length, res$Repeat_PID))
+    flush.console()
+  }
+  if (i %% 10 == 0 || i == nrow(sv_sub)) setTxtProgressBar(pb, i)
+}
+close(pb)
+
+# Compile and annotate results
+ssa_dt <- rbindlist(ssa_results, fill = TRUE)
+if (nrow(ssa_dt) == 0) stop("No results compiled. Check filters or inputs.")
+ssa_dt[, SSA_Candidate := Repeat_Length >= min_repeat & Repeat_PID >= 80]
+
+# Summarize by sample
+ssasummary <- ssa_dt[, .(
+  Num_Large_DEL = .N,
+  Num_SSA = sum(SSA_Candidate, na.rm = TRUE),
+  SSA_Fraction = sum(SSA_Candidate, na.rm = TRUE) / .N
+), by = Sample]
+
+# Plot
+ggplot(ssasummary, aes(x = SSA_Fraction)) +
+  geom_histogram(binwidth = 0.05, fill = "steelblue", color = "black") +
+  labs(title = "Fraction of Large SV Deletions with SSA-like Repeats (first 10 samples)",
+       x = "Fraction SSA Candidates", y = "Sample Count") +
+  theme_minimal()
+
+# Save results
+fwrite(ssa_dt, "PCAWG_SSA_like_deletions_first50.tsv", sep = "\t")
+fwrite(ssasummary, "PCAWG_SSA_summary_by_sample_first50.tsv", sep = "\t")
