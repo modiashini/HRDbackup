@@ -75,8 +75,10 @@ Reproduces:
 - scaling of Alt-EJ-like and SSA-like deletion burden with HRD score
 - deletion-size distributions across HRD
 - microhomology and homeology enrichment analyses
+```text
 scripts/
   fig2_hrd_scaling.py
+```
 ## Figure 3 — Tumor-type-specific repair pathway usage
 
 Reproduces:
@@ -84,35 +86,56 @@ Reproduces:
 - SSA and Alt-EJ burden across tumor types
 - HRD-stratified tumor analyses
 - normalized Alt-EJ vs SSA deletion landscapes
-
+```text
+scripts/
+  fig3_tumor_type_hrd.py
+```
 ## Figure 4 — Genome-wide deletion landscapes
 
 Reproduces:
 
 - genome-wide density tracks of Alt-EJ-like and SSA-like deletions
 - recurrent repair hotspots across tumor types
-
+```text
+scripts/
+  fig4_genomewide_density.py
+```
 ## Figure 5 — Transcription-associated enrichment
 
 Reproduces:
 
 - enrichment of Alt-EJ-like and SSA-like deletions near transcription start sites
 - comparisons between HR-proficient and HR-deficient tumors
-
+```text
+scripts/
+  fig5_tss_density.R
+```
 ## Supplementary figures
 
 ### Figure S1
 Homology length and deletion size characteristics of Alt-EJ– and SSA-like events
-
+```text
+scripts/
+  fig_s1_s2_s3.py
+```
 ### Figure S2
 Alt-EJ and SSA usage in BRCA2 and BRCA1-deficient tumors
-
+```text
+scripts/
+  fig_s1_s2_s3.py
+```
 ### Figure S3
 Genome-wide distribution of Alt-EJ- and SSA-like deletions across tumor types
-
+```text
+scripts/
+  figure_s1_s2_s3.py
+```
 ### Figure S4
 Distribution of SSA- and Alt-EJ-like deletion breakpoints relative to transcription start sites (TSS)
-
+```text
+scripts/
+  figure_s4_tss_density.py
+```
 ---
 
 # Running the pipeline
