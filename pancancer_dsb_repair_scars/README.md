@@ -1,10 +1,3 @@
-Ah — the issue is that the ChatGPT UI is *rendering* the markdown instead of showing you the raw markdown source.
-
-You need the literal raw text with the `#`, `##`, and triple backticks visible.
-
-So here it is inside a plain code block. Copy EVERYTHING inside this box directly into `README.md`:
-
-````text id="t8c8ly"
 # Pan-cancer genomic scars of Alt-EJ and SSA
 
 Code accompanying *“Pan-Cancer Genomic Scars of Alternative End Joining and Single-Strand Annealing”* by Ashini Modi, Alessandro Zito, and Giovanni Parmigiani.
@@ -162,5 +155,4 @@ along with manuscript figure panels written to the `figures/` directory.
 # Data source
 
 Analyses were performed on whole-genome-sequenced tumors from the International Cancer Genome Consortium (ICGC) / Pan-Cancer Analysis of Whole Genomes (PCAWG) project aligned to the hg19/GRCh37 reference genome.
-````
 
