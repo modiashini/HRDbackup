@@ -1,3 +1,17 @@
+# Pan-cancer genomic scars of Alt-EJ and SSA
+
+This is a test.
+
+## Repository structure
+
+```text
+R/
+  repair_scar_detection.R
+```
+
+- bullet 1
+- bullet 2
+- 
 Pan-cancer genomic scars of Alt-EJ and SSA
 
 Code accompanying “Pan-Cancer Genomic Scars of Alternative End Joining and Single-Strand Annealing” by Ashini Modi, Alessandro Zito, and Giovanni Parmigiani.
