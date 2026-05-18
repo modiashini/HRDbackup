@@ -70,32 +70,47 @@ Events are classified as SSA-like if they contain:
 
 ## Figure 2 — HRD scaling of SSA and Alt-EJ
 
-The repository reproduces analyses showing that:
+Reproduces:
 
-- Alt-EJ-like deletions increase strongly with HRD score
-- SSA-like deletions also increase with HRD, though more modestly
-- specific deletion-size and homology regimes correlate most strongly with HR deficiency
+- scaling of Alt-EJ-like and SSA-like deletion burden with HRD score
+- deletion-size distributions across HRD
+- microhomology and homeology enrichment analyses
 
 ## Figure 3 — Tumor-type-specific repair pathway usage
 
-The code reproduces comparisons of SSA and Alt-EJ burden across tumor types and HRD bins, including:
+Reproduces:
 
-- elevated SSA usage in prostate and liver tumors despite low HRD
-- enrichment of Alt-EJ scars in melanoma, kidney, and liver cancers
+- SSA and Alt-EJ burden across tumor types
+- HRD-stratified tumor analyses
+- normalized Alt-EJ vs SSA deletion landscapes
 
 ## Figure 4 — Genome-wide deletion landscapes
 
-Genome-wide density analyses identify:
+Reproduces:
 
-- recurrent Alt-EJ hotspots in lymphoid malignancies at the IGH locus
-- recurrent SSA enrichments in repeat-rich chromosomal regions
+- genome-wide density tracks of Alt-EJ-like and SSA-like deletions
+- recurrent repair hotspots across tumor types
 
 ## Figure 5 — Transcription-associated enrichment
 
-The repository reproduces TSS-distance analyses demonstrating:
+Reproduces:
 
-- strong enrichment of SSA-like deletions near transcription start sites in HR-proficient lymphoid tumors
-- moderate TSS enrichment for Alt-EJ-like deletions
+- enrichment of Alt-EJ-like and SSA-like deletions near transcription start sites
+- comparisons between HR-proficient and HR-deficient tumors
+
+## Supplementary figures
+
+### Figure S1
+Homology length and deletion size characteristics of Alt-EJ– and SSA-like events
+
+### Figure S2
+Alt-EJ and SSA usage in BRCA2 and BRCA1-deficient tumors
+
+### Figure S3
+Genome-wide distribution of Alt-EJ- and SSA-like deletions across tumor types
+
+### Figure S4
+Distribution of SSA- and Alt-EJ-like deletion breakpoints relative to transcription start sites (TSS)
 
 ---
 
@@ -134,7 +149,11 @@ This generates processed event-level and sample-level summary tables for:
 python scripts/fig2_hrd_scaling.py --config config/config.yml
 python scripts/fig3_tumor_type_hrd.py --config config/config.yml
 python scripts/fig4_genomewide_density.py --config config/config.yml
+
+python scripts/figure_s1_s2_s3.py --config config/config.yml
+
 Rscript scripts/fig5_tss_density.R config/config.yml
+Rscript scripts/figure_s4_tss_density.R config/config.yml
 ```
 
 ---
@@ -146,8 +165,11 @@ The pipeline produces processed tables such as:
 ```text
 PCAWG_AltEJ_like_deletions.tsv
 PCAWG_AltEJ_summary_by_sample.tsv
+
 PCAWG_SSA_like_deletions.tsv
 PCAWG_SSA_summary_by_sample.tsv
+
+PCAWG_composite_SSA_AltEJ_summary_by_sample.tsv
 ```
 
 along with manuscript figure panels written to the `figures/` directory.
@@ -157,4 +179,3 @@ along with manuscript figure panels written to the `figures/` directory.
 # Data source
 
 Analyses were performed on whole-genome-sequenced tumors from the International Cancer Genome Consortium (ICGC) / Pan-Cancer Analysis of Whole Genomes (PCAWG) project aligned to the hg19/GRCh37 reference genome.
-
