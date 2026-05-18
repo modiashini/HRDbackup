@@ -1,0 +1,21 @@
+# Edit these paths for your machine before running.
+paths:
+  maf_dir: data/raw/maf_rds
+  sv_file: data/raw/pcawg_consensus_1.6.161116.somatic_svs.xena.donor.tsv
+  hrd_file: data/raw/icgc_scarHRD_results.csv
+  donor_file: data/raw/pcawg_specimen_histology_August2016_v9_donor.tsv
+  tss_bed: data/raw/hg19_tss.bed
+  output_dir: data/processed
+  figure_dir: figures
+
+reference:
+  genome_build: hg19
+
+thresholds:
+  altej_min_deletion_bp: 6
+  altej_min_microhomology_bp: 2
+  altej_max_microhomology_bp: 25
+  ssa_min_deletion_bp: 50
+  ssa_min_repeat_bp: 30
+  ssa_min_percent_identity: 80
+  ssa_flank_bp: 500
