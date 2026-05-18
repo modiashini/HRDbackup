@@ -23,6 +23,9 @@ The code reproduces the main analyses and figures from the manuscript, including
 R/
   repair_scar_detection.R
 
+config/
+  config.yml
+
 scripts/
   00_run_detection.R
   common_figures.py
@@ -30,9 +33,8 @@ scripts/
   fig3_tumor_type_hrd.py
   fig4_genomewide_density.py
   fig5_tss_density.R
-
-config/
-  config.yml
+  figure_s1_s2_s3.py
+  figure_s4_tss_density.R
 ```
 
 ---
