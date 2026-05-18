@@ -75,7 +75,8 @@ Reproduces:
 - scaling of Alt-EJ-like and SSA-like deletion burden with HRD score
 - deletion-size distributions across HRD
 - microhomology and homeology enrichment analyses
-
+scripts/
+  fig2_hrd_scaling.py
 ## Figure 3 — Tumor-type-specific repair pathway usage
 
 Reproduces:
